@@ -1,6 +1,7 @@
 $input v_fog, relPos, frameTime, fogControl
 
 #include <bgfx_shader.sh>
+#include <bgfx_compute.sh>
 
 float bayerX2(vec2 a) {
     return fract(dot(floor(a), vec2(0.5, floor(a).y * 0.75)));
@@ -112,7 +113,7 @@ vec2 getRaySphereIntersection(const vec3 rayDir, const vec3 rayOrig, const float
 vec3 getAtmosphere(const vec3 pos, const vec3 sunPos, const float frameTime, const float rainLevel, const float intensity) {
     const int numSteps = 32;
 
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     vec3 rayOrig = vec3(0.0, EARTH_RADIUS + (ATMOSPHERE_RADIUS - EARTH_RADIUS) * 0.3, 0.0);
 
@@ -122,8 +123,8 @@ vec3 getAtmosphere(const vec3 pos, const vec3 sunPos, const float frameTime, con
     float rayStepsize = (p.y - p.x) / float(numSteps);
     float raySteps = 0.0;
 
-    vec3 totalRayleigh = vec3(0.0, 0.0, 0.0);
-    vec3 totalMie = vec3(0.0, 0.0, 0.0);
+    vec3 totalRayleigh = vec3_splat(0.0);
+    vec3 totalMie = vec3_splat(0.0);
 
     float rayLeighOpticalDepth = 0.0;
     float mieOpticalDepth = 0.0;
@@ -167,7 +168,7 @@ float getStars(const vec3 pos, const float time) {
 }
 
 vec3 getSky(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const vec2 screenPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     totalSky = getAtmosphere(pos, shadowLightPos, frameTime, rainLevel, mix(2.0, 20.0, daylight));
     totalSky = mix(totalSky, vec3(getLuma(totalSky), getLuma(totalSky), getLuma(totalSky)), rainLevel);

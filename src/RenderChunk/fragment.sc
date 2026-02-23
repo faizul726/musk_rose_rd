@@ -75,10 +75,10 @@ vec3 offset(const vec2 pos, const vec2 intPos, const vec2 offset, const float ti
 }
 float getRippleSplatter(const vec3 randPos, const float time){
     vec2 p = randPos.xy;
-    p += vec2(0.5, 0.5);
-    p += clamp(p, vec2(-0.5, -0.5), vec2(0.5, 0.5));
+    p += vec2_splat(0.5);
+    p += clamp(p, vec2_splat(-0.5), vec2_splat(0.5));
 
-    float cone = 1.0 - distance(p, vec2(0.0, 0.0));
+    float cone = 1.0 - distance(p, vec2_splat(0.0));
     
     float cycleTime = fract(randPos.z + time);
     float animatedCone = cone + cycleTime;
@@ -340,7 +340,7 @@ vec2 getRaySphereIntersection(const vec3 rayDir, const vec3 rayOrig, const float
     float raySphereSquared = raySphere * raySphere;
 
     float delta = PoD * PoD + raySphereSquared - dot(rayOrig, rayOrig);
-    if (delta < 0.0) return vec2(-1.0, -1.0);
+    if (delta < 0.0) return vec2_splat(-1.0);
     delta = sqrt(delta);
 
     return -PoD + vec2(-delta, delta);
@@ -349,7 +349,7 @@ vec2 getRaySphereIntersection(const vec3 rayDir, const vec3 rayOrig, const float
 vec3 getAtmosphere(const vec3 pos, const vec3 sunPos, const float frameTime, const float rainLevel, const float intensity) {
     const int numSteps = 32;
 
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     vec3 rayOrig = vec3(0.0, EARTH_RADIUS, 0.0);
 
@@ -359,8 +359,8 @@ vec3 getAtmosphere(const vec3 pos, const vec3 sunPos, const float frameTime, con
     float rayStepsize = (p.y - p.x) / float(numSteps);
     float raySteps = 0.0;
 
-    vec3 totalRayleigh = vec3(0.0, 0.0, 0.0);
-    vec3 totalMie = vec3(0.0, 0.0, 0.0);
+    vec3 totalRayleigh = vec3_splat(0.0);
+    vec3 totalMie = vec3_splat(0.0);
 
     float rayLeighOpticalDepth = 0.0;
     float mieOpticalDepth = 0.0;
@@ -388,7 +388,7 @@ vec3 getAtmosphere(const vec3 pos, const vec3 sunPos, const float frameTime, con
 vec3 getAtmosphereClouds(const vec3 pos, const vec3 sunPos, const float frameTime, const float rainLevel, const float intensity) {
     const int numSteps = 32;
 
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     vec3 rayOrig = vec3(0.0, EARTH_RADIUS, 0.0);
 
@@ -398,8 +398,8 @@ vec3 getAtmosphereClouds(const vec3 pos, const vec3 sunPos, const float frameTim
     float rayStepsize = (p.y - p.x) / float(numSteps);
     float raySteps = 0.0;
 
-    vec3 totalRayleigh = vec3(0.0, 0.0, 0.0);
-    vec3 totalMie = vec3(0.0, 0.0, 0.0);
+    vec3 totalRayleigh = vec3_splat(0.0);
+    vec3 totalMie = vec3_splat(0.0);
 
     float rayLeighOpticalDepth = 0.0;
     float mieOpticalDepth = 0.0;
@@ -430,7 +430,7 @@ vec3 getAtmosphereClouds(const vec3 pos, const vec3 sunPos, const float frameTim
 vec3 getAtmosphereTheEnd(const vec3 pos, const vec3 sunPos, const float frameTime, const float rainLevel, const float intensity) {
     const int numSteps = 32;
 
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     vec3 rayOrig = vec3(0.0, EARTH_RADIUS_THE_END + (ATMOSPHERE_RADIUS_THE_END - EARTH_RADIUS_THE_END) * 0.3, 0.0);
 
@@ -440,8 +440,8 @@ vec3 getAtmosphereTheEnd(const vec3 pos, const vec3 sunPos, const float frameTim
     float rayStepsize = (p.y - p.x) / float(numSteps);
     float raySteps = 0.0;
 
-    vec3 totalRayleigh = vec3(0.0, 0.0, 0.0);
-    vec3 totalMie = vec3(0.0, 0.0, 0.0);
+    vec3 totalRayleigh = vec3_splat(0.0);
+    vec3 totalMie = vec3_splat(0.0);
 
     float rayLeighOpticalDepth = 0.0;
     float mieOpticalDepth = 0.0;
@@ -485,30 +485,30 @@ float getStars(const vec3 pos, const float time) {
 }
 
 vec3 getSky(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const vec2 screenPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     totalSky = getAtmosphereClouds(pos * mix(0.65, 1.0, bayerX64(screenPos.xy) * 0.5 + 0.5), shadowLightPos, frameTime, rainLevel, mix(2.0, 20.0, daylight));
     totalSky = mix(totalSky, vec3(getLuma(totalSky), getLuma(totalSky), getLuma(totalSky)), rainLevel);
     totalSky *= mix(0.65, 1.0, bayerX64(screenPos.xy) * 0.5 + 0.5);
 
-    totalSky = mix(totalSky, vec3(1.0, 1.0, 1.0), getStars(pos, frameTime) * (1.0 - daylight) * (1.0 - rainLevel));
-    totalSky = mix(totalSky, vec3(1.0, 1.0, 1.0), getSun(pos, sunPos) * (1.0 - rainLevel));
+    totalSky = mix(totalSky, vec3_splat(1.0), getStars(pos, frameTime) * (1.0 - daylight) * (1.0 - rainLevel));
+    totalSky = mix(totalSky, vec3_splat(1.0), getSun(pos, sunPos) * (1.0 - rainLevel));
     totalSky = mix(totalSky, vec3(1.0, 0.95, 0.81), getMoon(pos, moonPos) * (1.0 - rainLevel));
 
     return clamp(totalSky, 0.0, 1.0);
 }
 
 vec3 getSkyTheEnd(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const vec2 screenPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     totalSky = getAtmosphereTheEnd(pos, shadowLightPos, frameTime, rainLevel, mix(2.0, 20.0, daylight));
     totalSky = mix(totalSky, vec3(getLuma(totalSky), getLuma(totalSky), getLuma(totalSky)), rainLevel);
 
     float drawSpace = max(0.0, length(pos.xz / (pos.y * float(16))));
     if (drawSpace < 1.0 && !bool(step(pos.y, 0.0))) {
-        totalSky = mix(totalSky, vec3(1.0, 1.0, 1.0), getStars(pos, frameTime) * (1.0 - drawSpace));
+        totalSky = mix(totalSky, vec3_splat(1.0), getStars(pos, frameTime) * (1.0 - drawSpace));
     }
-    totalSky = mix(totalSky, vec3(1.0, 1.0, 1.0), getSun(pos, sunPos));
+    totalSky = mix(totalSky, vec3_splat(1.0), getSun(pos, sunPos));
 
     return totalSky;
 }
@@ -537,7 +537,7 @@ vec3 getSunlightCol(const float daylight) {
 }
 
 vec3 getSkylightCol(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     totalSky = getAtmosphere(pos, shadowLightPos, frameTime, rainLevel, mix(2.0, 20.0, daylight));
     totalSky = mix(totalSky, vec3(getLuma(totalSky), getLuma(totalSky), getLuma(totalSky)), rainLevel);
@@ -546,7 +546,7 @@ vec3 getSkylightCol(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const
 }
 
 vec3 getSkylightColTheEnd(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     totalSky = getAtmosphereTheEnd(pos, shadowLightPos, frameTime, rainLevel, mix(2.0, 20.0, daylight));
     totalSky = mix(totalSky, vec3(getLuma(totalSky), getLuma(totalSky), getLuma(totalSky)), rainLevel);
@@ -555,9 +555,9 @@ vec3 getSkylightColTheEnd(const vec3 pos, const vec3 sunPos, const vec3 moonPos,
 }
 
 vec3 getAmbientLightCol(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const float daylight, const float frameTime, const float rainLevel, const float moonHeight, const float outdoor, const float pointLightLevel) {
-    vec3 totalAmbientLightCol = vec3(0.0, 0.0, 0.0);
+    vec3 totalAmbientLightCol = vec3_splat(0.0);
 
-    totalAmbientLightCol = mix(mix(vec3(1.0, 1.0, 1.0), pointlightCol, pointLightLevel), mix(moonlightCol, mix(getSunlightCol(daylight), getSkylightCol(pos, sunPos, moonPos, shadowLightPos, daylight, frameTime, rainLevel), 0.5), daylight), outdoor);
+    totalAmbientLightCol = mix(mix(vec3_splat(1.0), pointlightCol, pointLightLevel), mix(moonlightCol, mix(getSunlightCol(daylight), getSkylightCol(pos, sunPos, moonPos, shadowLightPos, daylight, frameTime, rainLevel), 0.5), daylight), outdoor);
 
     return totalAmbientLightCol;
 }
@@ -573,7 +573,7 @@ vec3 getAmbientLightCol(const vec3 pos, const vec3 sunPos, const vec3 moonPos, c
 #define GAMMA 2.2
 
 vec3 getAmbientLight(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const float daylight, const float frameTime, const float rainLevel, const float moonHeight, const float outdoor, const float pointLightLevel) {
-    vec3 totalAmbientLight = vec3(0.0, 0.0, 0.0);
+    vec3 totalAmbientLight = vec3_splat(0.0);
     
     float intensity = AMBIENTLIGHT_INTENSITY;
     totalAmbientLight = intensity * getAmbientLightCol(pos, sunPos, moonPos, shadowLightPos, daylight, frameTime, rainLevel, moonHeight, outdoor, pointLightLevel);
@@ -582,33 +582,33 @@ vec3 getAmbientLight(const vec3 pos, const vec3 sunPos, const vec3 moonPos, cons
 }
 
 vec3 getSunlight(const float daylight, const vec4 directionalShadowCol, const float rainLevel) {
-    vec3 totalSunLight = vec3(0.0, 0.0, 0.0);
+    vec3 totalSunLight = vec3_splat(0.0);
 
     float intensity = SUNLIGHT_INTENSITY * daylight;
     intensity *= mix(1.0, RAIN_CUTOFF, rainLevel);
 
     vec3 shadowCutoff = intensity * (1.0 - directionalShadowCol.rgb);
     totalSunLight = intensity * getSunlightCol(daylight) + (intensity * getSunlightCol(daylight) - shadowCutoff);
-    totalSunLight = mix(totalSunLight, vec3(0.0, 0.0, 0.0), directionalShadowCol.a);
+    totalSunLight = mix(totalSunLight, vec3_splat(0.0), directionalShadowCol.a);
 
     return totalSunLight;
 }
 
 vec3 getMoonlight(const float moonHeight, const vec4 directionalShadowCol, const float rainLevel) {
-    vec3 totalMoonLight = vec3(0.0, 0.0, 0.0);
+    vec3 totalMoonLight = vec3_splat(0.0);
 
     float intensity = MOONLIGHT_INTENSITY * moonHeight;
     intensity *= mix(1.0, RAIN_CUTOFF, rainLevel);
 
     vec3 shadowCutoff = intensity * (1.0 - directionalShadowCol.rgb);
     totalMoonLight = intensity * moonlightCol + (intensity * moonlightCol - shadowCutoff);
-    totalMoonLight = mix(totalMoonLight, vec3(0.0, 0.0, 0.0), directionalShadowCol.a);
+    totalMoonLight = mix(totalMoonLight, vec3_splat(0.0), directionalShadowCol.a);
 
     return totalMoonLight;
 }
 
 vec3 getSkylight(const float outdoor, const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSkyLight = vec3(0.0, 0.0, 0.0);
+    vec3 totalSkyLight = vec3_splat(0.0);
 
     float intensity = SKYLIGHT_INTENSITY;
     intensity *= mix(1.0, RAIN_CUTOFF, rainLevel);
@@ -620,7 +620,7 @@ vec3 getSkylight(const float outdoor, const vec3 pos, const vec3 sunPos, const v
 }
 
 vec3 getSkylightTheEnd(const float outdoor, const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSkyLight = vec3(0.0, 0.0, 0.0);
+    vec3 totalSkyLight = vec3_splat(0.0);
 
     float intensity = SKYLIGHT_INTENSITY;
     intensity *= mix(1.0, RAIN_CUTOFF, rainLevel);
@@ -632,7 +632,7 @@ vec3 getSkylightTheEnd(const float outdoor, const vec3 pos, const vec3 sunPos, c
 }
 
 vec3 getPointLight(const float pointLightLevel, const float outdoor, const float daylight, const float rainLevel) {
-    vec3 totalPointLight = vec3(0.0, 0.0, 0.0);
+    vec3 totalPointLight = vec3_splat(0.0);
 
     float intensity = POINTLIGHT_INTENSITY * pointLightLevel;
     intensity *= mix(mix(1.0, 0.0, smoothstep(0.7, 0.94, outdoor * daylight)), RAIN_CUTOFF, rainLevel);
@@ -713,11 +713,11 @@ int getBlockID(const vec4 texCol) {
 }
 
 void main() {
-vec4 albedo = vec4(0.0, 0.0, 0.0, 0.0);
-vec4 texCol = vec4(0.0, 0.0, 0.0, 0.0);
+vec4 albedo = vec4_splat(0.0);
+vec4 texCol = vec4_splat(0.0);
 
 #if defined(DEPTH_ONLY_OPAQUE) || defined(DEPTH_ONLY)
-        albedo.rgb = vec3(1.0, 1.0, 1.0);
+        albedo.rgb = vec3_splat(1.0);
 #   else
         albedo = texture2D(s_MatTexture, v_texcoord0);
         texCol = albedo;
@@ -727,7 +727,7 @@ vec4 texCol = vec4(0.0, 0.0, 0.0, 0.0);
 #   endif
 
 #   if defined(SEASONS) && (defined(OPAQUE) || defined(ALPHA_TEST))
-        albedo.rgb *= mix(vec3(1.0, 1.0, 1.0), texture2D(s_SeasonsTexture, v_color0.xy).rgb * 2.0, v_color0.b);
+        albedo.rgb *= mix(vec3_splat(1.0), texture2D(s_SeasonsTexture, v_color0.xy).rgb * 2.0, v_color0.b);
         albedo.rgb *= v_color0.aaa;
 #   else
         if (abs(v_color0.r - v_color0.g) > 0.001 || abs(v_color0.g - v_color0.b) > 0.001) albedo.rgb *= normalize(v_color0.rgb);
@@ -822,7 +822,7 @@ if (waterFlag > 0.5) {
     F0 = mix(F0, 0.9, rainRipples);
 }
 
-vec4 directionalShadowCol = vec4(0.0, 0.0, 0.0, 0.0);
+vec4 directionalShadowCol = vec4_splat(0.0);
 float outdoor = isTheEnd ? 1.0 : v_lightmapUV.y;
 float shadow = isTheEnd ? 0.0 : smoothstep(0.94, 0.92, outdoor);
 float diffuse = max(0.0, dot(shadowLightPos, normal));
@@ -830,8 +830,8 @@ directionalShadowCol.a = mix(1.0, shadow, diffuse);
 
 float pointLightLevel = v_lightmapUV.x * v_lightmapUV.x * v_lightmapUV.x * v_lightmapUV.x * v_lightmapUV.x;
 
-vec3 directionalLight = vec3(0.0, 0.0, 0.0);
-vec3 undirectionalLight = vec3(0.0, 0.0, 0.0);
+vec3 directionalLight = vec3_splat(0.0);
+vec3 undirectionalLight = vec3_splat(0.0);
 
 undirectionalLight += getAmbientLight(pos, sunPos, moonPos, shadowLightPos, daylight, frameTime, rainLevel, moonHeight, outdoor, pointLightLevel) * (1.0 - vanillaAO);
 directionalLight   += getSunlight(daylight, directionalShadowCol, rainLevel);

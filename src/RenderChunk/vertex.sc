@@ -33,8 +33,8 @@ relPos = mul(model, vec4(a_position, 1.0)).xyz;
 
 v_color0 =
 #ifdef RENDER_AS_BILLBOARDS
-    vec4(1.0, 1.0, 1.0, 1.0);
-    relPos += vec3(0.5, 0.5, 0.5);
+    vec4_splat(1.0);
+    relPos += vec3_splat(0.5);
     vec3 viewDir = normalize(relPos - ViewPositionAndTime.xyz);
     vec3 boardPlane = normalize(vec3(viewDir.z, 0.0, -viewDir.x));
     relPos = (relPos - ((((viewDir.yzx * boardPlane.zxy) - (viewDir.zxy * boardPlane.yzx)) * (a_color0.z - 0.5)) + (boardPlane * (a_color0.x - 0.5))));
@@ -59,7 +59,7 @@ float fogEnd = 1.2;
 v_fog.a = clamp(((((length((ViewPositionAndTime.xyz - relPos)) / FogAndDistanceControl.z) + RenderChunkFogAlpha.x) - fogStart) / (fogEnd - fogStart)), 0.0, 1.0);
 
 v_texcoord0 = a_texcoord0;
-v_lightmapUV = a_texcoord1;
+v_lightmapUV = fract(a_texcoord1.y*vec2(256.0, 4096.0));
 
 fragPos = a_position;
 frameTime = ViewPositionAndTime.w;

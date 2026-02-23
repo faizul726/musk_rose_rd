@@ -113,7 +113,7 @@ vec2 getRaySphereIntersection(const vec3 rayDir, const vec3 rayOrig, const float
 vec3 getAtmosphere(const vec3 pos, const vec3 sunPos, const vec2 screenPos, const float frameTime, const float rainLevel, const float intensity) {
     const int numSteps = 32;
 
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     vec3 rayOrig = vec3(0.0, EARTH_RADIUS, 0.0);
 
@@ -123,8 +123,8 @@ vec3 getAtmosphere(const vec3 pos, const vec3 sunPos, const vec2 screenPos, cons
     float rayStepsize = (p.y - p.x) / float(numSteps);
     float raySteps = 0.0;
 
-    vec3 totalRayleigh = vec3(0.0, 0.0, 0.0);
-    vec3 totalMie = vec3(0.0, 0.0, 0.0);
+    vec3 totalRayleigh = vec3_splat(0.0);
+    vec3 totalMie = vec3_splat(0.0);
 
     float rayLeighOpticalDepth = 0.0;
     float mieOpticalDepth = 0.0;
@@ -168,14 +168,14 @@ float getStars(const vec3 pos, const float time) {
 }
 
 vec3 getSky(const vec3 pos, const vec3 sunPos, const vec3 moonPos, const vec3 shadowLightPos, const vec2 screenPos, const float daylight, const float frameTime, const float rainLevel) {
-    vec3 totalSky = vec3(0.0, 0.0, 0.0);
+    vec3 totalSky = vec3_splat(0.0);
 
     totalSky = getAtmosphere(pos, shadowLightPos, screenPos, frameTime, rainLevel, mix(2.0, 20.0, daylight));
     totalSky = mix(totalSky, vec3(getLuma(totalSky), getLuma(totalSky), getLuma(totalSky)), rainLevel);
     totalSky *= mix(0.65, 1.0, bayerX64(screenPos) * 0.5 + 0.5);
 
-    totalSky = mix(totalSky, vec3(1.0, 1.0, 1.0), getStars(pos, frameTime) * (1.0 - daylight) * (1.0 - rainLevel));
-    totalSky = mix(totalSky, vec3(1.0, 1.0, 1.0), getSun(pos, sunPos) * (1.0 - rainLevel));
+    totalSky = mix(totalSky, vec3_splat(1.0), getStars(pos, frameTime) * (1.0 - daylight) * (1.0 - rainLevel));
+    totalSky = mix(totalSky, vec3_splat(1.0), getSun(pos, sunPos) * (1.0 - rainLevel));
     totalSky = mix(totalSky, vec3(1.0, 0.95, 0.81), getMoon(pos, moonPos) * (1.0 - rainLevel));
 
     return totalSky;
