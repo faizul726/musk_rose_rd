@@ -9,15 +9,15 @@ uniform vec4 ViewPositionAndTime;
 uniform vec4 FogAndDistanceControl;
 
 void main() {
-relPos = a_position;
+    relPos = a_position;
 
-/* Cubemap position fix */
-relPos.y -= 0.205;
-relPos.yz *= -1.0;
+    /* Cubemap position fix */
+    relPos.y -= 0.205;
+    relPos.yz *= -1.0;
 
-v_fog = FogColor;
-frameTime = ViewPositionAndTime.w;
-fogControl = FogAndDistanceControl.xy;
+    v_fog = FogColor;
+    frameTime = ViewPositionAndTime.w;
+    fogControl = FogAndDistanceControl.xy;
 
     gl_Position = mul(u_modelViewProj, vec4(a_position, 1.0));
 }
