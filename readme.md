@@ -1,8 +1,5 @@
 # Musk Rose RD - Shaders dedicated for beauty.
 
-> [!NOTE]
-> This is an unofficial fork
-
 A shader pack for RenderDragon.
 
 ![Screenshot](./images/main.png)
